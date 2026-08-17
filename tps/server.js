@@ -4,7 +4,7 @@ const path = require('path');
 const { WebSocketServer } = require('ws');
 
 const ROOT = __dirname;
-const PORT = 5173;
+const PORT = process.env.PORT || 5173;
 
 // ============ 静态文件服务 ============
 const MIME = {
