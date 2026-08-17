@@ -1,0 +1,13 @@
+{
+  "name": "gunfight",
+  "version": "1.0.0",
+  "description": "多人联机俯视角枪战游戏",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "three": "^0.185.1",
+    "ws": "^8.18.0"
+  }
+}

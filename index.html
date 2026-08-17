@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>贪吃蛇小游戏</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="game-container">
+    <h1 class="game-title">🐍 贪吃蛇</h1>
+
+    <div class="score-board">
+      <div class="score-item">
+        <span class="score-label">得分</span>
+        <span id="score" class="score-value">0</span>
+      </div>
+      <div class="score-item">
+        <span class="score-label">最高分</span>
+        <span id="highScore" class="score-value">0</span>
+      </div>
+    </div>
+
+    <div class="board-wrapper">
+      <canvas id="gameCanvas" width="400" height="400"></canvas>
+
+      <div id="overlay" class="overlay">
+        <div class="overlay-content">
+          <h2 id="overlayTitle">准备开始</h2>
+          <p id="overlayMessage">按 空格键 或点击按钮开始游戏</p>
+          <button id="startBtn" class="btn btn-primary">开始游戏</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="controls">
+      <p class="tips">
+        方向键 / WASD 控制方向 · 空格键 暂停/继续
+      </p>
+      <div class="dpad">
+        <button class="dpad-btn" data-dir="up" aria-label="上">▲</button>
+        <div class="dpad-middle">
+          <button class="dpad-btn" data-dir="left" aria-label="左">◀</button>
+          <button class="dpad-btn" data-dir="down" aria-label="下">▼</button>
+          <button class="dpad-btn" data-dir="right" aria-label="右">▶</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="game.js"></script>
+</body>
+</html>

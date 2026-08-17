@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>联机枪战 3D · Gunfight</title>
+  <link rel="stylesheet" href="style.css" />
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"
+      }
+    }
+  </script>
+</head>
+<body>
+  <canvas id="game"></canvas>
+
+  <!-- 准心 -->
+  <div id="crosshair" class="crosshair hidden">
+    <span class="ch-line ch-up"></span>
+    <span class="ch-line ch-down"></span>
+    <span class="ch-line ch-left"></span>
+    <span class="ch-line ch-right"></span>
+    <span class="ch-dot"></span>
+  </div>
+
+  <!-- 击杀信息提示 -->
+  <div id="killFeed"></div>
+
+  <!-- HUD -->
+  <div class="hud-top">
+    <div class="hp-bar"><div id="hpFill"></div><span id="hpText">100</span></div>
+    <div class="stats">
+      <span>击杀 <b id="kills">0</b></span>
+      <span>死亡 <b id="deaths">0</b></span>
+    </div>
+  </div>
+
+  <div class="leaderboard" id="leaderboard"></div>
+
+  <!-- 连接提示 -->
+  <div id="connectionBar" class="connection-bar">连接中...</div>
+
+  <!-- 加入弹窗 -->
+  <div id="joinModal" class="modal">
+    <div class="modal-content">
+      <h1>🔫 联机枪战</h1>
+      <p class="subtitle">WASD 移动 · 鼠标控制视角 · 左键射击 · ESC 释放鼠标</p>
+      <input id="nameInput" type="text" maxlength="12" placeholder="输入昵称" />
+      <button id="joinBtn" class="btn-primary">加入战斗</button>
+      <p class="hint" id="joinHint"></p>
+    </div>
+  </div>
+
+  <!-- 鼠标锁定提示 -->
+  <div id="pointerHint" class="pointer-hint hidden">🖱 点击屏幕以控制视角</div>
+
+  <!-- 死亡提示 -->
+  <div id="deathOverlay" class="death-overlay hidden">
+    <div class="death-box">
+      <h2>你阵亡了</h2>
+      <p id="respawnCountdown">3 秒后复活...</p>
+    </div>
+  </div>
+
+  <!-- 触屏摇杆 -->
+  <div id="joystick" class="joystick hidden">
+    <div id="joystickKnob" class="joystick-knob"></div>
+  </div>
+  <button id="fireBtn" class="fire-btn hidden">🔫 射击</button>
+
+  <script type="module" src="game.js"></script>
+</body>
+</html>

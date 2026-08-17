@@ -1,0 +1,430 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+  background: #0a0f16;
+  color: #e8f6f3;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+#game {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* ============ 准心 ============ */
+.crosshair {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+  z-index: 10;
+  transition: opacity 0.15s;
+}
+.crosshair.hidden { opacity: 0; }
+.crosshair.ads { opacity: 0; }
+
+/* ============ 开镜镜筒 ============ */
+.scope-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 7;
+  opacity: 0;
+  transition: opacity 0.12s;
+  /* 四周黑色镜筒，中央透明圆孔可见敌人 */
+  background: radial-gradient(circle at 50% 50%,
+    transparent 0, transparent 150px,
+    rgba(0, 0, 0, 0.9) 153px,
+    rgba(0, 0, 0, 0.97) 100%);
+}
+.scope-overlay.ads { opacity: 1; }
+
+/* 镜筒内缘圆环 */
+.scope-overlay::before {
+  content: '';
+  position: absolute;
+  left: 50%; top: 50%;
+  width: 300px; height: 300px;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  border: 2px solid #000;
+  box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.85);
+}
+
+/* 镜筒内十字准心（细线，中心为红点准心） */
+.scope-cross { position: absolute; left: 50%; top: 50%; width: 0; height: 0; }
+.scope-cross .sc-line {
+  position: absolute;
+  background: rgba(0, 0, 0, 0.85);
+  box-shadow: 0 0 1px rgba(255, 255, 255, 0.35);
+}
+.scope-cross .sc-v { left: -0.5px; top: -130px; width: 1px; height: 260px; }
+.scope-cross .sc-h { left: -130px; top: -0.5px; width: 260px; height: 1px; }
+.scope-cross .sc-dot {
+  position: absolute;
+  left: -2px; top: -2px;
+  width: 4px; height: 4px;
+  border-radius: 50%;
+  background: #ff3b30;
+  box-shadow: 0 0 6px rgba(255, 59, 48, 0.9);
+}
+
+.ch-line {
+  position: absolute;
+  background: #fff;
+  box-shadow: 0 0 3px rgba(0, 0, 0, 0.9);
+}
+.ch-line.ch-up    { left: -1px; top: -14px; width: 2px; height: 8px; }
+.ch-line.ch-down  { left: -1px; top: 6px;   width: 2px; height: 8px; }
+.ch-line.ch-left  { left: -14px; top: -1px; height: 2px; width: 8px; }
+.ch-line.ch-right { left: 6px;   top: -1px; height: 2px; width: 8px; }
+
+.ch-dot {
+  position: absolute;
+  left: -1.5px;
+  top: -1.5px;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: #4ade80;
+  box-shadow: 0 0 4px rgba(74, 222, 128, 0.9);
+}
+
+/* 准心扩散（射击时） */
+.crosshair.spread .ch-line.ch-up    { transform: translateY(-2px); }
+.crosshair.spread .ch-line.ch-down  { transform: translateY(2px); }
+.crosshair.spread .ch-line.ch-left  { transform: translateX(-2px); }
+.crosshair.spread .ch-line.ch-right { transform: translateX(2px); }
+.crosshair .ch-line { transition: transform 0.05s; }
+
+/* ============ 命中反馈 ============ */
+.hitmarker {
+  display: none; /* 命中反馈改为白准心变红，不再使用独立红线条 */
+}
+.hitmarker span {
+  position: absolute;
+  width: 2px;
+  height: 10px;
+  background: #ff5f5f;
+  box-shadow: 0 0 4px rgba(255, 95, 95, 0.9);
+}
+.hitmarker.active span { animation: hitflash 0.18s ease-out forwards; }
+.hitmarker span.hm-up    { transform: translate(-1px, -16px) rotate(0deg); }
+.hitmarker span.hm-down  { transform: translate(-1px, 6px) rotate(0deg); }
+.hitmarker span.hm-left  { transform: translate(-16px, -1px) rotate(90deg); }
+.hitmarker span.hm-right { transform: translate(6px, -1px) rotate(90deg); }
+@keyframes hitflash {
+  0% { opacity: 1; }
+  100% { opacity: 0; transform: scale(0.6); }
+}
+
+/* ============ HUD ============ */
+.hud-top {
+  position: fixed;
+  top: 18px;
+  left: 18px;
+  right: 18px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  pointer-events: none;
+  z-index: 8;
+}
+
+.hp-bar {
+  position: relative;
+  width: 240px;
+  height: 26px;
+  background: rgba(0, 0, 0, 0.55);
+  border-radius: 13px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+#hpFill {
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 100%;
+  background: linear-gradient(90deg, #22c55e, #4ade80);
+  transition: width 0.15s, background 0.3s;
+}
+#hpText {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+}
+
+.stats {
+  display: flex;
+  gap: 18px;
+  font-size: 15px;
+  font-weight: 600;
+  background: rgba(0, 0, 0, 0.45);
+  padding: 8px 16px;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+.stats b { color: #4ade80; font-size: 17px; }
+
+/* ============ 目标提示 ============ */
+.target-hint {
+  position: fixed;
+  left: 50%;
+  top: 52%;
+  transform: translateX(-50%);
+  pointer-events: none;
+  z-index: 9;
+  font-size: 13px;
+  color: #f87171;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
+  opacity: 0;
+  transition: opacity 0.1s;
+}
+
+/* ============ 击杀信息 ============ */
+#killFeed {
+  position: fixed;
+  top: 70px;
+  right: 18px;
+  z-index: 8;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  pointer-events: none;
+}
+.kill-item {
+  background: rgba(0, 0, 0, 0.5);
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-size: 14px;
+  animation: fadeIn 0.2s ease;
+  border-left: 3px solid #f87171;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateX(20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+/* ============ 伤害方向指示 ============ */
+.damage-indicator {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 7;
+}
+.damage-flash {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(ellipse at center, transparent 55%, rgba(239, 68, 68, 0.5) 100%);
+  opacity: 0;
+  transition: opacity 0.4s;
+  pointer-events: none;
+  z-index: 6;
+}
+
+/* ============ 鼠标锁定提示 ============ */
+.pointer-hint {
+  position: fixed;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.6);
+  padding: 10px 20px;
+  border-radius: 10px;
+  font-size: 15px;
+  z-index: 9;
+  pointer-events: none;
+}
+.pointer-hint.hidden { display: none; }
+
+/* ============ 弹窗 ============ */
+.modal, .death-overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(5, 12, 16, 0.85);
+  z-index: 20;
+  backdrop-filter: blur(4px);
+}
+.modal.hidden, .death-overlay.hidden { display: none; }
+
+.modal-content {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 18px;
+  padding: 36px 42px;
+  max-width: 460px;
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+.modal-content h1 {
+  font-size: 30px;
+  margin-bottom: 8px;
+  letter-spacing: 2px;
+}
+.subtitle {
+  font-size: 14px;
+  opacity: 0.8;
+  margin-bottom: 20px;
+}
+.controls-list {
+  list-style: none;
+  text-align: left;
+  margin-bottom: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 14px;
+  opacity: 0.9;
+}
+.controls-list b { color: #4ade80; }
+.hint {
+  margin-top: 16px;
+  font-size: 13px;
+  opacity: 0.6;
+}
+
+.death-box {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 18px;
+  padding: 36px 48px;
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+.death-box h2 { font-size: 30px; margin-bottom: 12px; color: #f87171; }
+.death-box p { margin-bottom: 24px; font-size: 15px; opacity: 0.85; }
+#winOverlay .death-box h2 { color: #4ade80; }
+
+.btn-primary {
+  padding: 13px 42px;
+  font-size: 17px;
+  font-weight: 700;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  color: #fff;
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  box-shadow: 0 6px 20px rgba(34, 197, 94, 0.4);
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 28px rgba(34, 197, 94, 0.55);
+}
+.btn-primary:active { transform: translateY(0); }
+
+/* ============ 准星命中变红 ============ */
+.crosshair.hit .ch-line { background: #ff5f5f; box-shadow: 0 0 4px rgba(255, 95, 95, 0.9); }
+.crosshair.hit .ch-dot  { background: #ff5f5f; box-shadow: 0 0 4px rgba(255, 95, 95, 0.9); }
+
+/* ============ 伤害方向箭头 ============ */
+.damage-indicator.hidden { display: none; }
+.di-arrow {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 0;
+  height: 0;
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+  border-bottom: 16px solid rgba(255, 80, 80, 0.95);
+  transform: translate(-50%, -50%);
+  filter: drop-shadow(0 0 4px rgba(255, 0, 0, 0.8));
+}
+.damage-flash.active { opacity: 1; }
+
+/* ============ 排行榜 ============ */
+.panel {
+  position: fixed;
+  left: 18px;
+  bottom: 18px;
+  z-index: 8;
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  padding: 10px 14px;
+  min-width: 180px;
+  pointer-events: none;
+}
+.panel-title {
+  font-size: 13px;
+  font-weight: 700;
+  opacity: 0.8;
+  margin-bottom: 6px;
+  letter-spacing: 1px;
+}
+.pl-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  padding: 3px 6px;
+  border-radius: 6px;
+}
+.pl-row.me { background: rgba(74, 222, 128, 0.15); }
+.pl-row.me .pl-name { color: #4ade80; font-weight: 700; }
+.pl-row.dead .pl-name { opacity: 0.5; text-decoration: line-through; }
+.pl-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 120px;
+}
+.pl-kd { color: #fbbf24; font-weight: 600; font-variant-numeric: tabular-nums; }
+
+/* ============ 连接状态 ============ */
+.conn-status {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(0, 0, 0, 0.7);
+  padding: 12px 24px;
+  border-radius: 10px;
+  font-size: 15px;
+  z-index: 30;
+}
+
+/* ============ 名字输入 ============ */
+.name-row { margin-bottom: 18px; }
+#nameInput {
+  width: 100%;
+  padding: 11px 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(0, 0, 0, 0.35);
+  color: #fff;
+  font-size: 15px;
+  outline: none;
+  text-align: center;
+}
+#nameInput:focus { border-color: #4ade80; }
+#nameInput::placeholder { color: rgba(255, 255, 255, 0.45); }
+
+/* ============ 重生倒计时 ============ */
+.respawn-timer {
+  color: #fbbf24;
+  font-size: 15px;
+  font-weight: 700;
+  min-height: 22px;
+}

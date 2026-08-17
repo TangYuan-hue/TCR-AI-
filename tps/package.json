@@ -1,0 +1,12 @@
+{
+  "name": "tps-multiplayer",
+  "version": "1.0.0",
+  "description": "3D 第三人称射击联机游戏",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "ws": "^8.18.0"
+  }
+}

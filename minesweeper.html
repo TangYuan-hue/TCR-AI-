@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>扫雷 · Minesweeper</title>
+  <link rel="stylesheet" href="minesweeper.css" />
+</head>
+<body>
+  <div class="game-container">
+    <h1 class="game-title">💣 扫雷</h1>
+
+    <!-- 难度选择 -->
+    <div class="difficulty-bar">
+      <button class="diff-btn active" data-level="beginner">初级</button>
+      <button class="diff-btn" data-level="intermediate">中级</button>
+      <button class="diff-btn" data-level="expert">高级</button>
+      <button class="diff-btn" data-level="custom">自定义</button>
+    </div>
+
+    <!-- 状态栏 -->
+    <div class="status-bar">
+      <div class="counter" id="mineCounter">000</div>
+      <button class="face-btn" id="faceBtn" aria-label="重新开始">😀</button>
+      <div class="counter" id="timer">000</div>
+    </div>
+
+    <!-- 棋盘 -->
+    <div class="board-wrapper">
+      <div class="board" id="board"></div>
+    </div>
+
+    <!-- 操作提示 -->
+    <div class="controls">
+      <div class="mode-toggle">
+        <button class="mode-btn active" id="digMode" data-mode="dig">⛏️ 挖掘</button>
+        <button class="mode-btn" id="flagMode" data-mode="flag">🚩 插旗</button>
+      </div>
+      <p class="tips">
+        左键点击 揭开 · 右键 插旗/取消 · 双击数字 快速展开<br />
+        移动端：点按 揭开 · 长按或切到插旗模式 标记地雷
+      </p>
+    </div>
+
+    <!-- 自定义弹窗 -->
+    <div class="modal hidden" id="customModal">
+      <div class="modal-content">
+        <h2>自定义难度</h2>
+        <label>行数 <input type="number" id="customRows" min="5" max="24" value="12" /></label>
+        <label>列数 <input type="number" id="customCols" min="5" max="30" value="12" /></label>
+        <label>雷数 <input type="number" id="customMines" min="5" max="500" value="20" /></label>
+        <div class="modal-actions">
+          <button class="btn btn-ghost" id="customCancel">取消</button>
+          <button class="btn btn-primary" id="customOk">开始</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="minesweeper.js"></script>
+</body>
+</html>

@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>联机枪战 · TPS Multiplayer</title>
+  <link rel="stylesheet" href="style.css" />
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"
+      }
+    }
+  </script>
+</head>
+<body>
+  <canvas id="game"></canvas>
+
+  <!-- 准心 -->
+  <div id="crosshair" class="crosshair hidden">
+    <span class="ch-line ch-up"></span>
+    <span class="ch-line ch-down"></span>
+    <span class="ch-line ch-left"></span>
+    <span class="ch-line ch-right"></span>
+    <span class="ch-dot"></span>
+  </div>
+
+  <!-- 开镜镜筒遮罩 -->
+  <div id="scopeOverlay" class="scope-overlay">
+    <div class="scope-cross">
+      <span class="sc-line sc-v"></span>
+      <span class="sc-line sc-h"></span>
+      <span class="sc-dot"></span>
+    </div>
+  </div>
+
+  <!-- 命中反馈 -->
+  <div id="hitmarker" class="hitmarker">
+    <span class="hm-up"></span>
+    <span class="hm-down"></span>
+    <span class="hm-left"></span>
+    <span class="hm-right"></span>
+  </div>
+
+  <!-- 伤害方向指示 -->
+  <div id="damageIndicator" class="damage-indicator hidden"><span class="di-arrow"></span></div>
+
+  <!-- 全屏伤害闪烁 -->
+  <div id="damageFlash" class="damage-flash"></div>
+
+  <!-- HUD：血量 -->
+  <div class="hud-top">
+    <div class="hp-bar"><div id="hpFill"></div><span id="hpText">100</span></div>
+    <div class="stats">
+      <span>击杀 <b id="kills">0</b></span>
+      <span>死亡 <b id="deaths">0</b></span>
+      <span>弹药 <b id="ammo">30</b>/<b id="ammoReserve">∞</b></span>
+    </div>
+  </div>
+
+  <!-- 准星目标提示 -->
+  <div id="targetHint" class="target-hint"></div>
+
+  <!-- 击杀信息 -->
+  <div id="killFeed"></div>
+
+  <!-- 排行榜 -->
+  <div id="leaderboard" class="panel">
+    <div class="panel-title">玩家</div>
+    <div id="playerList"></div>
+  </div>
+
+  <!-- 连接状态 -->
+  <div id="connStatus" class="conn-status">连接中…</div>
+
+  <!-- 鼠标锁定提示 -->
+  <div id="pointerHint" class="pointer-hint hidden">🖱 点击屏幕以控制视角</div>
+
+  <!-- 开始界面 -->
+  <div id="startModal" class="modal">
+    <div class="modal-content">
+      <h1>🔫 联机枪战</h1>
+      <p class="subtitle">多人对战 · WASD 移动 · 鼠标视角 · 左键射击 · R 换弹</p>
+      <div class="name-row">
+        <input id="nameInput" type="text" maxlength="12" placeholder="输入昵称（默认：玩家）" />
+      </div>
+      <ul class="controls-list">
+        <li><b>鼠标</b> — 旋转视角，准心始终在屏幕中央</li>
+        <li><b>W/A/S/D</b> — 前后左右移动 · <b>Shift</b> — 冲刺</li>
+        <li><b>左键</b> — 射击（按住连发） · <b>R</b> — 换弹 · <b>E</b> — 开镜</li>
+        <li><b>空格</b> — 跳跃 · <b>ESC</b> — 释放鼠标</li>
+      </ul>
+      <button id="startBtn" class="btn-primary">进入战斗</button>
+      <p class="hint">与其他玩家对战 · 击杀最多者获胜</p>
+    </div>
+  </div>
+
+  <!-- 死亡界面 -->
+  <div id="deathOverlay" class="death-overlay hidden">
+    <div class="death-box">
+      <h2>你阵亡了</h2>
+      <p id="deathInfo">击杀 0 · 死亡 1</p>
+      <p id="respawnTimer" class="respawn-timer"></p>
+      <button id="respawnBtn" class="btn-primary">继续战斗</button>
+    </div>
+  </div>
+
+  <script type="module" src="game.js"></script>
+</body>
+</html>
