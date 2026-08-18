@@ -58,8 +58,6 @@ const matGun = new THREE.MeshStandardMaterial({ color: 0x2a3441, roughness: 0.35
 const matGunDark = new THREE.MeshStandardMaterial({ color: 0x111827, roughness: 0.45, metalness: 0.5 });
 const matMag = new THREE.MeshStandardMaterial({ color: 0x1a1f26, roughness: 0.4, metalness: 0.6 });
 const matGoggle = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.1, metalness: 0.8 });
-const matRedDot = new THREE.MeshBasicMaterial({ color: 0xff3b30 });
-const matLens = new THREE.MeshPhysicalMaterial({ color: 0xcfe4f2, roughness: 0.05, metalness: 0, transparent: true, opacity: 0.15, depthWrite: false });
 const playerPalette = [0xf43f5e, 0xf59e0b, 0x10b981, 0x8b5cf6, 0x06b6d4, 0xf97316, 0xec4899, 0x84cc16];
 
 function remoteMaterials(color) {
@@ -70,7 +68,6 @@ function remoteMaterials(color) {
     gun: new THREE.MeshStandardMaterial({ color: 0x2a3441, roughness: 0.35, metalness: 0.7 }),
     gunDark: matGunDark,
     mag: matMag,
-    redDot: matRedDot,
   };
 }
 
@@ -191,10 +188,8 @@ function buildRifle(mats) {
   mag.position.set(0, -0.16, -0.06); mag.rotation.x = 0.3;
   const sight = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.05, 0.12), mats.gunDark);
   sight.position.set(0, 0.08, -0.05);
-  const dot = new THREE.Mesh(new THREE.BoxGeometry(0.02, 0.02, 0.005), mats.redDot);
-  dot.position.set(0, 0.08, 0.012);
-  g.add(barrel, muzzle, handguard, receiver, stock, mag, sight, dot);
-  g.userData.hitMeshes = [barrel, muzzle, handguard, receiver, stock, mag, sight, dot];
+  g.add(barrel, muzzle, handguard, receiver, stock, mag, sight);
+  g.userData.hitMeshes = [barrel, muzzle, handguard, receiver, stock, mag, sight];
   return g;
 }
 
@@ -207,7 +202,7 @@ const player = {
 };
 const playerGroup = createCharacter({
   body: matPlayer, head: matPlayerHead, goggle: matGoggle,
-  gun: matGun, gunDark: matGunDark, mag: matMag, redDot: matRedDot,
+  gun: matGun, gunDark: matGunDark, mag: matMag,
 });
 playerGroup.visible = false;
 scene.add(playerGroup);
@@ -233,19 +228,11 @@ fpBody.position.set(0, -0.02, -0.05);
 const fpStock = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.14, 0.32), matGunDark);
 fpStock.position.set(0, -0.05, 0.3);
 
-// 红点瞄准镜（底座 + 透明镜筒 + 前后镜圈 + 透明镜片 + 中心红点）
-const fpSightMount = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.05, 0.14), matGunDark);
-fpSightMount.position.set(0, 0.1, -0.18);
-const fpSightBody = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.045, 0.16, 20), matLens);
-fpSightBody.rotation.x = Math.PI / 2; fpSightBody.position.set(0, 0.14, -0.18);
-const fpSightRingF = new THREE.Mesh(new THREE.TorusGeometry(0.045, 0.007, 8, 20), matGunDark);
-fpSightRingF.position.set(0, 0.14, -0.1);
-const fpSightRingB = new THREE.Mesh(new THREE.TorusGeometry(0.045, 0.007, 8, 20), matGunDark);
-fpSightRingB.position.set(0, 0.14, -0.26);
-const fpSightLens = new THREE.Mesh(new THREE.CircleGeometry(0.04, 20), matLens);
-fpSightLens.position.set(0, 0.14, -0.098);
-const fpSightDot = new THREE.Mesh(new THREE.SphereGeometry(0.000875, 8, 8), matRedDot);
-fpSightDot.position.set(0, 0.14, -0.1);
+// 机瞄（前准星 + 后照门）
+const fpFrontPost = new THREE.Mesh(new THREE.BoxGeometry(0.015, 0.06, 0.015), matGunDark);
+fpFrontPost.position.set(0, 0.08, -0.55);
+const fpRearSight = new THREE.Mesh(new THREE.BoxGeometry(0.07, 0.03, 0.03), matGunDark);
+fpRearSight.position.set(0, 0.075, -0.08);
 
 // 弹夹（独立分组，用于换弹动画：取下/装上）
 const fpMag = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.22, 0.12), matMag);
@@ -268,7 +255,7 @@ const fpCharging = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.03, 0.08), matGu
 fpCharging.position.set(0.07, 0, -0.1);
 
 fpGun.add(fpBarrel, fpMuzzle, fpHandguard, fpBody, fpStock,
-  fpSightMount, fpSightBody, fpSightRingF, fpSightRingB, fpSightLens, fpSightDot,
+  fpFrontPost, fpRearSight,
   fpMagGroup, fpGrip, fpTriggerGuard, fpCharging);
 fpGun.position.set(0.32, -0.26, -0.55);
 scene.add(camera);
@@ -437,11 +424,11 @@ let myId = null;
 function send(msg) { if (ws.readyState === 1) ws.send(JSON.stringify(msg)); }
 function sendReload() { if (gameStarted && player.alive) send({ type: 'reload' }); }
 
-// ============ 开镜（E 键切换） ============
+// ============ 开镜（E 键切换，机瞄 + 红点准心） ============
 function setAds(v) {
   ads = v;
-  document.getElementById('crosshair').classList.toggle('ads', v);
-  document.getElementById('scopeOverlay').classList.toggle('ads', v);
+  document.getElementById('crosshair').classList.toggle('ads', v); // 开镜时隐藏腰射准心
+  document.getElementById('adsDot').classList.toggle('ads', v);    // 显示红点机瞄准心
 }
 function toggleAds() {
   if (!gameStarted || !player.alive || player.reloading) return;
@@ -765,7 +752,7 @@ function animate() {
   const adsTarget = ads ? 1 : 0;
   adsAmount += (adsTarget - adsAmount) * Math.min(1, dt * 14);
   if (Math.abs(adsTarget - adsAmount) < 0.005) adsAmount = adsTarget;
-  curFov = 70 - adsAmount * 32;          // 视野 70 → 38（约 1.8 倍放大）
+  curFov = 70 - adsAmount * 25;          // 视野 70 → 45（机瞄，约 1.55 倍放大）
   camera.fov = curFov;
   camera.updateProjectionMatrix();
 
@@ -806,21 +793,15 @@ function animate() {
     }
     fpMagGroup.position.y = -magDrop;
 
-    // 开镜时枪械移到眼前，瞄准镜对准眼睛（透过透明镜片看镜筒内）；移动时轻微抖动
-    const moving = !!(keys['KeyW'] || keys['KeyS'] || keys['KeyA'] || keys['KeyD']);
-    const breathe = 1 - adsAmount * 0.6;              // 开镜时呼吸摆动减弱
+    // 机瞄：开镜时枪械抬到眼前，红点准心位于枪身上方
     const recoil = 1 - adsAmount * 0.7;               // 开镜时换弹/后坐力位移减弱
-    const jitter = adsAmount * (moving ? 1 : 0);      // 开镜移动时抖动强度
-    const jx = Math.sin(t * 30) * 0.006 * jitter;
-    const jy = Math.cos(t * 26) * 0.005 * jitter;
-    const jr = Math.sin(t * 24) * 0.018 * jitter;
     fpGun.position.set(
-      0.32 * (1 - adsAmount) + Math.sin(t * 2) * 0.004 * breathe + jx,
-      (-0.26 + Math.sin(t * 2.6) * 0.005 * breathe) * (1 - adsAmount)
-        - 0.14 * adsAmount - dip * 0.42 * recoil + jy,
-      -0.55 * (1 - adsAmount) - 0.02 * adsAmount - dip * 0.2 * recoil
+      0.32 * (1 - adsAmount),
+      (-0.26) * (1 - adsAmount)
+        - 0.15 * adsAmount - dip * 0.42 * recoil,
+      -0.55 * (1 - adsAmount) - 0.04 * adsAmount - dip * 0.2 * recoil
     );
-    fpGun.rotation.set(dip * 1.0 * recoil, sway * 0.08 * (1 - adsAmount), sway * 0.24 * (1 - adsAmount) + jr);
+    fpGun.rotation.set(dip * 1.0 * recoil, sway * 0.08 * (1 - adsAmount), sway * 0.24 * (1 - adsAmount));
   }
 
   updateParticles(dt);

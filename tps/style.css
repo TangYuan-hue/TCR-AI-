@@ -35,51 +35,24 @@ html, body {
 .crosshair.hidden { opacity: 0; }
 .crosshair.ads { opacity: 0; }
 
-/* ============ 开镜镜筒 ============ */
-.scope-overlay {
+/* ============ 开镜红点准心（机瞄，无十字架） ============ */
+.ads-dot {
   position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 7;
-  opacity: 0;
-  transition: opacity 0.12s;
-  /* 四周黑色镜筒，中央透明圆孔可见敌人 */
-  background: radial-gradient(circle at 50% 50%,
-    transparent 0, transparent 150px,
-    rgba(0, 0, 0, 0.9) 153px,
-    rgba(0, 0, 0, 0.97) 100%);
-}
-.scope-overlay.ads { opacity: 1; }
-
-/* 镜筒内缘圆环 */
-.scope-overlay::before {
-  content: '';
-  position: absolute;
-  left: 50%; top: 50%;
-  width: 300px; height: 300px;
-  transform: translate(-50%, -50%);
-  border-radius: 50%;
-  border: 2px solid #000;
-  box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.85);
-}
-
-/* 镜筒内十字准心（细线，中心为红点准心） */
-.scope-cross { position: absolute; left: 50%; top: 50%; width: 0; height: 0; }
-.scope-cross .sc-line {
-  position: absolute;
-  background: rgba(0, 0, 0, 0.85);
-  box-shadow: 0 0 1px rgba(255, 255, 255, 0.35);
-}
-.scope-cross .sc-v { left: -0.5px; top: -130px; width: 1px; height: 260px; }
-.scope-cross .sc-h { left: -130px; top: -0.5px; width: 260px; height: 1px; }
-.scope-cross .sc-dot {
-  position: absolute;
-  left: -2px; top: -2px;
-  width: 4px; height: 4px;
+  left: 50%;
+  top: 50%;
+  width: 5px;
+  height: 5px;
+  margin-left: -2.5px;
+  margin-top: -2.5px;
   border-radius: 50%;
   background: #ff3b30;
-  box-shadow: 0 0 6px rgba(255, 59, 48, 0.9);
+  box-shadow: 0 0 7px rgba(255, 59, 48, 0.95);
+  pointer-events: none;
+  z-index: 10;
+  opacity: 0;
+  transition: opacity 0.12s;
 }
+.ads-dot.ads { opacity: 1; }
 
 .ch-line {
   position: absolute;
