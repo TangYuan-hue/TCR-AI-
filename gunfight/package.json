@@ -1,13 +1,12 @@
 {
   "name": "gunfight",
-  "version": "1.0.0",
-  "description": "多人联机俯视角枪战游戏",
+  "version": "2.0.0",
+  "description": "3D 联机第一人称枪战游戏（多障碍物、人机混战、开镜机瞄）",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
   },
   "dependencies": {
-    "three": "^0.185.1",
     "ws": "^8.18.0"
   }
 }
